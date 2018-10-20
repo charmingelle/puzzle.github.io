@@ -299,7 +299,7 @@ class PuzzleSet {
   }
 }
 
-const setPuzzleDetails = (minPuzzleAmount = 10) => {
+const setPuzzleDetails = (minPuzzleAmount = 7) => {
   if (background.width < background.height) {
     puzzleDetails.horizontalAmount = minPuzzleAmount;
     puzzleDetails.width = background.width / puzzleDetails.horizontalAmount;

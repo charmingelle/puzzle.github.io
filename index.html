@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel='stylesheet' href='styles.css'>
+  <title>Puzzle</title>
+</head>
+
+<body>
+  <div id='main'>
+    <canvas id='upper-canvas'></canvas>
+    <canvas id='canvas'></canvas>
+    <div id='menu'>
+      <input type='file' name='file-upload' id='file-upload' accept='.jpg, .jpeg, .png'>
+      <label for='file-upload' id='file-upload-label'>Upload a picture</label>
+      <p id='win' class='hidden'>Congratulations!</p>
+    </div>
+  </div>
+  <audio id='sound' src='glue.mp3' preload='auto' class='hidden'></audio>
+  <script src='script.js'></script>
+</body>
+
+</html>

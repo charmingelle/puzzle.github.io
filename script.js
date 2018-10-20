@@ -21,12 +21,12 @@ class Point {
 
 class Puzzle {
   constructor(start, pose, curveCoefs) {
-    this.a = start;
-    this.b = new Point(start.x + puzzleDetails.width, start.y);
-    this.c = new Point(start.x, start.y + puzzleDetails.height);
+    this.a = new Point(Math.round(start.x), Math.round(start.y));
+    this.b = new Point(Math.round(start.x + puzzleDetails.width), Math.round(start.y));
+    this.c = new Point(Math.round(start.x), Math.round(start.y + puzzleDetails.height));
     this.d = new Point(
-      start.x + puzzleDetails.width,
-      start.y + puzzleDetails.height
+      Math.round(start.x + puzzleDetails.width),
+      Math.round(start.y + puzzleDetails.height)
     );
     this.currentA = pose;
     this.currentB = new Point(pose.x + puzzleDetails.width, pose.y);
@@ -299,7 +299,7 @@ class PuzzleSet {
   }
 }
 
-const setPuzzleDetails = (minPuzzleAmount = 7) => {
+const setPuzzleDetails = (minPuzzleAmount = 10) => {
   if (background.width < background.height) {
     puzzleDetails.horizontalAmount = minPuzzleAmount;
     puzzleDetails.width = background.width / puzzleDetails.horizontalAmount;

@@ -20,14 +20,11 @@ class Point {
 }
 
 class Puzzle {
-  constructor(start, pose, curveCoefs) {
-    this.a = new Point(Math.round(start.x), Math.round(start.y));
-    this.b = new Point(Math.round(start.x + puzzleDetails.width), Math.round(start.y));
-    this.c = new Point(Math.round(start.x), Math.round(start.y + puzzleDetails.height));
-    this.d = new Point(
-      Math.round(start.x + puzzleDetails.width),
-      Math.round(start.y + puzzleDetails.height)
-    );
+  constructor(i, j, pose, curveCoefs) {
+    this.a = new Point(i, j);
+    this.b = new Point(i + 1, j)
+    this.c = new Point(i, j + 1);
+    this.d = new Point(i + 1, j + 1);
     this.currentA = pose;
     this.currentB = new Point(pose.x + puzzleDetails.width, pose.y);
     this.currentC = new Point(pose.x, pose.y + puzzleDetails.height);
@@ -127,8 +124,8 @@ class Puzzle {
   drawBackground(context) {
     context.drawImage(
       background,
-      this.a.x - puzzleDetails.widthThird,
-      this.a.y - puzzleDetails.heightThird,
+      this.a.x * puzzleDetails.width - puzzleDetails.widthThird,
+      this.a.y * puzzleDetails.height - puzzleDetails.heightThird,
       puzzleDetails.width + 2 * puzzleDetails.widthThird,
       puzzleDetails.height + 2 * puzzleDetails.heightThird,
       this.currentA.x - puzzleDetails.widthThird,
@@ -360,7 +357,8 @@ const initiatePuzzleSets = () => {
       let positionIndex = Math.floor(Math.random() * positions.length);
       let puzzleSet = new PuzzleSet(
         new Puzzle(
-          new Point(i * puzzleDetails.width, j * puzzleDetails.height),
+          i,
+          j,
           positions[positionIndex],
           curveCoefs[i][j]
         )

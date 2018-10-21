@@ -122,10 +122,19 @@ class Puzzle {
   }
 
   drawBackground(context) {
+    let startX = this.a.x * puzzleDetails.width;
+    let startY =  this.a.y * puzzleDetails.height;
+    
+    if (startX - puzzleDetails.widthThird > 0) {
+      startX -= puzzleDetails.widthThird;
+    }
+    if (startY - puzzleDetails.heightThird > 0) {
+      startY -= puzzleDetails.heightThird;
+    }
     context.drawImage(
       background,
-      this.a.x * puzzleDetails.width - puzzleDetails.widthThird,
-      this.a.y * puzzleDetails.height - puzzleDetails.heightThird,
+      startX,
+      startY,
       puzzleDetails.width + 2 * puzzleDetails.widthThird,
       puzzleDetails.height + 2 * puzzleDetails.heightThird,
       this.currentA.x - puzzleDetails.widthThird,

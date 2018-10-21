@@ -22,6 +22,7 @@ class Point {
 class Puzzle {
   constructor(i, j, pose, curveCoefs) {
     this.a = new Point(i, j);
+    console.log(`(${a.x}, ${a.y})`);
     this.b = new Point(i + 1, j)
     this.c = new Point(i, j + 1);
     this.d = new Point(i + 1, j + 1);

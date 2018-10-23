@@ -3062,7 +3062,7 @@ const getSelectedIndex = rects => {
 };
 
 const touchStartHandler = (e, rects) => {
-  [mouse.x, mouse.y] = [e.clientX, e.clientY];
+  [mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY];
   
   let selectedIndex = getSelectedIndex(rects);
 
@@ -3079,7 +3079,7 @@ const touchStartHandler = (e, rects) => {
 };
 
 const touchMoveHandler = e => {
-  [mouse.x, mouse.y] = [e.clientX, e.clientY];
+  [mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY];
   if (selected) {
     upperContext.clearRect(0, 0, canvas.width, canvas.height);
     selected.move(mouse);

@@ -8,14 +8,14 @@ body {
 }
 
 #canvas {
-  position: absolute;
+  position: fixed;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
 }
 
 #upper-canvas {
-  position: absolute;
+  position: fixed;
   width: 100vw;
   height: 100vh;
   z-index: 100;
@@ -23,7 +23,7 @@ body {
 }
 
 #menu {
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   display: flex;

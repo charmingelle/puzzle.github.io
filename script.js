@@ -20,18 +20,18 @@ class Point {
 }
 
 class Puzzle {
-  constructor(i, j, pose, curveCoefs) {
-    this.a = new Point(i, j);
-    console.log(`(${this.a.x}, ${this.a.y})`);
-    this.b = new Point(i + 1, j)
-    this.c = new Point(i, j + 1);
-    this.d = new Point(i + 1, j + 1);
-    this.currentA = pose;
-    this.currentB = new Point(pose.x + puzzleDetails.width, pose.y);
-    this.currentC = new Point(pose.x, pose.y + puzzleDetails.height);
+  constructor(puzzlePosition, imagePosition, curveCoefs) {
+    this.a = puzzlePosition;
+    this.b = new Point(this.a.x + 1, this.a.y)
+    this.c = new Point(this.a.x, this.a.y + 1);
+    this.d = new Point(this.a.x + 1, this.a.y + 1);
+    this.imagePosition = imagePosition;
+    this.currentA = imagePosition;
+    this.currentB = new Point(this.currentA.x + puzzleDetails.width, this.currentA.y);
+    this.currentC = new Point(this.currentA.x, this.currentA.y + puzzleDetails.height);
     this.currentD = new Point(
-      pose.x + puzzleDetails.width,
-      pose.y + puzzleDetails.height
+      this.currentA.x + puzzleDetails.width,
+      this.currentA.y + puzzleDetails.height
     );
     this.offsetA;
     this.offsetB;
@@ -123,21 +123,12 @@ class Puzzle {
   }
 
   drawBackground(context) {
-    let startX = this.a.x * puzzleDetails.width;
-    let startY =  this.a.y * puzzleDetails.height;
-    
-    if (startX - puzzleDetails.widthThird > 0) {
-      startX -= puzzleDetails.widthThird;
-    }
-    if (startY - puzzleDetails.heightThird > 0) {
-      startY -= puzzleDetails.heightThird;
-    }
     context.drawImage(
       background,
-      startX,
-      startY,
-      puzzleDetails.width + 2 * puzzleDetails.widthThird,
-      puzzleDetails.height + 2 * puzzleDetails.heightThird,
+      this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3,
+      this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3,
+      puzzleDetails.imageWidth + 2 * (puzzleDetails.imageWidth / 3),
+      puzzleDetails.imageHeight + 2 * (puzzleDetails.imageHeight / 3),
       this.currentA.x - puzzleDetails.widthThird,
       this.currentA.y - puzzleDetails.heightThird,
       puzzleDetails.width + 2 * puzzleDetails.widthThird,
@@ -307,41 +298,57 @@ class PuzzleSet {
 }
 
 const setPuzzleDetails = (minPuzzleAmount = 7) => {
-  if (background.width < background.height) {
+  style = window.getComputedStyle(canvas);
+  canvas.width = parseInt(style.width);
+  canvas.height = parseInt(style.height);
+  upperCanvas.width = canvas.width;
+  upperCanvas.height = canvas.height;
+
+  let coef = Math.min(
+    (0.8 * canvas.width) / background.width,
+    (0.8 * canvas.height) / background.height
+  );
+
+  puzzleDetails.finalWidth = coef * background.width;
+  puzzleDetails.finalHeight = coef * background.height;
+  if (puzzleDetails.finalWidth > puzzleDetails.finalHeight) {
     puzzleDetails.horizontalAmount = minPuzzleAmount;
-    puzzleDetails.width = background.width / puzzleDetails.horizontalAmount;
+    puzzleDetails.width = puzzleDetails.finalWidth / puzzleDetails.horizontalAmount;
+    puzzleDetails.imageWidth = background.width / puzzleDetails.horizontalAmount;
     puzzleDetails.verticalAmount = parseInt(
-      background.height / puzzleDetails.width
+      puzzleDetails.finalHeight / puzzleDetails.width
     );
-    puzzleDetails.height = background.height / puzzleDetails.verticalAmount;
+    puzzleDetails.height = puzzleDetails.finalHeight / puzzleDetails.verticalAmount;
+    puzzleDetails.imageHeight = background.height / puzzleDetails.verticalAmount;
   } else {
     puzzleDetails.verticalAmount = minPuzzleAmount;
-    puzzleDetails.height = background.height / puzzleDetails.verticalAmount;
+    puzzleDetails.height = puzzleDetails.finalHeight / puzzleDetails.verticalAmount;
+    puzzleDetails.imageHeight = background.height / puzzleDetails.verticalAmount;
     puzzleDetails.horizontalAmount = parseInt(
-      background.width / puzzleDetails.height
+      puzzleDetails.finalWidth / puzzleDetails.height
     );
-    puzzleDetails.width = background.width / puzzleDetails.horizontalAmount;
+    puzzleDetails.width = puzzleDetails.finalWidth / puzzleDetails.horizontalAmount;
+    puzzleDetails.imageWidth = background.width / puzzleDetails.horizontalAmount;
   }
+  puzzleDetails.xPosition = canvas.width / puzzleDetails.horizontalAmount;
+  puzzleDetails.yPosition = canvas.height / puzzleDetails.verticalAmount;
   puzzleDetails.widthThird = puzzleDetails.width / 3;
   puzzleDetails.heightThird = puzzleDetails.height / 3;
 };
 
-const getRandomPuzzlePositions = () => {
-  let xPosition = canvas.width / puzzleDetails.horizontalAmount;
-  let yPosition = canvas.height / puzzleDetails.verticalAmount;
+const getPuzzlePositions = () => {
   let positions = [];
 
   for (let i = 0; i < puzzleDetails.horizontalAmount; i++) {
     for (let j = 0; j < puzzleDetails.verticalAmount; j++) {
-      positions.push(new Point(xPosition * i, yPosition * j));
+      positions.push(new Point(i * puzzleDetails.xPosition, j * puzzleDetails.yPosition));
     }
   }
   return positions;
-};
+}
 
 const initiatePuzzleSets = () => {
-  setPuzzleDetails();
-  let positions = getRandomPuzzlePositions();
+  let positions = getPuzzlePositions();
   let puzzleSets = [];
   let curveCoefs = [];
 
@@ -367,10 +374,9 @@ const initiatePuzzleSets = () => {
       let positionIndex = Math.floor(Math.random() * positions.length);
       let puzzleSet = new PuzzleSet(
         new Puzzle(
-          i,
-          j,
+          new Point(i, j),
           positions[positionIndex],
-          curveCoefs[i][j]
+          curveCoefs[i][j],
         )
       );
 
@@ -433,46 +439,19 @@ const mouseUpHandler = rects => {
     rects.push(selected);
     selected.draw();
     selected = false;
-    if (rects.length === 1) {
-      win.classList.remove("hidden");
-    }
   }
 };
 
 const createGame = () => {
-  let rects = initiatePuzzleSets();
+  setPuzzleDetails();
+  rects = initiatePuzzleSets();
 
   window.onmousedown = () => mouseDownHandler(rects);
   window.onmousemove = e => mouseMoveHandler(e);
   window.onmouseup = () => mouseUpHandler(rects);
 };
 
-const getResizedImage = image => {
-  let tempCanvas = document.createElement("canvas");
-  let tempContext = tempCanvas.getContext("2d");
-  let coef = Math.min(
-    (0.8 * canvas.width) / image.width,
-    (0.8 * canvas.height) / image.height
-  );
-
-  tempCanvas.width = coef * image.width;
-  tempCanvas.height = coef * image.height;
-  tempContext.drawImage(
-    image,
-    0,
-    0,
-    image.width,
-    image.height,
-    0,
-    0,
-    tempCanvas.width,
-    tempCanvas.height
-  );
-  let resizedImage = new Image(tempCanvas.width, tempCanvas.height);
-  resizedImage.src = tempCanvas.toDataURL();
-  return resizedImage;
-};
-
+let menu = document.getElementById('menu');
 let fileUpload = document.getElementById("file-upload");
 let canvas = document.getElementById("canvas");
 let upperCanvas = document.getElementById("upper-canvas");
@@ -480,33 +459,38 @@ let context = canvas.getContext("2d");
 let upperContext = upperCanvas.getContext("2d");
 let background;
 let puzzleDetails = {};
-let style = window.getComputedStyle(canvas);
+let canvasStyle = window.getComputedStyle(canvas);
 let selected = false;
 let sound = document.getElementById("sound");
-let win = document.getElementById("win");
 let mouse = new Point(0, 0);
 
-canvas.width = parseInt(style.width);
-canvas.height = parseInt(style.height);
+canvas.width = parseInt(canvasStyle.width);
+canvas.height = parseInt(canvasStyle.height);
 upperCanvas.width = canvas.width;
 upperCanvas.height = canvas.height;
+
+canvas.style.minWidth = canvas.width + 'px';
+canvas.style.maxWidth = canvas.width + 'px';
+canvas.style.minHeight = canvas.height + 'px';
+canvas.style.maxHeight = canvas.height + 'px';
+
+upperCanvas.style.minWidth = canvas.width + 'px';
+upperCanvas.style.maxWidth = canvas.width + 'px';
+upperCanvas.style.minHeight = canvas.height + 'px';
+upperCanvas.style.maxHeight = canvas.height + 'px';
 
 fileUpload.addEventListener("click", () => {
   fileUpload.value = null;
 });
 
 fileUpload.addEventListener("change", () => {
-  let image = new Image();
+  background = new Image();
 
-  image.src = URL.createObjectURL(fileUpload.files[0]);
-  image.onload = () => {
-    win.classList.add("hidden");
+  background.src = URL.createObjectURL(fileUpload.files[0]);
+  background.onload = () => {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    background = getResizedImage(image);
-    background.onload = () => {
-      createGame();
-    };
+    createGame();
   };
-  image.onerror = () =>
+  background.onerror = () =>
     console.log("An error occured while file uploading. Please try again.");
 });

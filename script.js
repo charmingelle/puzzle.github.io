@@ -3172,14 +3172,20 @@ const createGame = () => {
   });
 
   window.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     touchStartHandler(e, rects);
   });
 
   window.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     touchMoveHandler(e);
   });
 
   window.addEventListener('touchend', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     touchEndHandler(rects);
   });
 

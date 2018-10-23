@@ -38,7 +38,9 @@ body {
 
 #file-upload-label {
   padding: 2vh;
-  border: 1px solid black;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #1ab394;
   user-select: none;
 }
 

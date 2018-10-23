@@ -345,7 +345,7 @@ const setPuzzleDetails = (minPuzzleAmount = 7) => {
       background.width / puzzleDetails.horizontalAmount;
   }
   puzzleDetails.xPosition = canvas.width / puzzleDetails.horizontalAmount;
-  puzzleDetails.yPosition = canvas.height / puzzleDetails.verticalAmount;
+  puzzleDetails.yPosition = 0.9 * canvas.height / puzzleDetails.verticalAmount;
   puzzleDetails.widthThird = puzzleDetails.width / 3;
   puzzleDetails.heightThird = puzzleDetails.height / 3;
 };

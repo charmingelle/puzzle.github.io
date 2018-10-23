@@ -586,3 +586,8 @@ fileUpload.addEventListener("change", () => {
   background.onerror = () =>
     console.log("An error occured while file uploading. Please try again.");
 });
+
+document.body.addEventListener('scroll', e => {
+  e.preventDefault();
+  e.stopPropagation();
+})

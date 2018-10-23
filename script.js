@@ -161,29 +161,29 @@ class Puzzle {
 
   isNearOtherLeft(other) {
     return (
-      this.currentB.distance(other.currentA) < 10 &&
-      this.currentD.distance(other.currentC) < 10
+      this.currentB.distance(other.currentA) < 20 &&
+      this.currentD.distance(other.currentC) < 20
     );
   }
 
   isNearOtherRight(other) {
     return (
-      this.currentA.distance(other.currentB) < 10 &&
-      this.currentC.distance(other.currentD) < 10
+      this.currentA.distance(other.currentB) < 20 &&
+      this.currentC.distance(other.currentD) < 20
     );
   }
 
   isNearOtherTop(other) {
     return (
-      this.currentC.distance(other.currentA) < 10 &&
-      this.currentD.distance(other.currentB) < 10
+      this.currentC.distance(other.currentA) < 20 &&
+      this.currentD.distance(other.currentB) < 20
     );
   }
 
   isNearOtherBottom(other) {
     return (
-      this.currentA.distance(other.currentC) < 10 &&
-      this.currentB.distance(other.currentD) < 10
+      this.currentA.distance(other.currentC) < 20 &&
+      this.currentB.distance(other.currentD) < 20
     );
   }
 
@@ -311,8 +311,8 @@ const setPuzzleDetails = (minPuzzleAmount = 7) => {
   upperCanvas.height = canvas.height;
 
   let coef = Math.min(
-    (0.6 * canvas.width) / background.width,
-    (0.6 * canvas.height) / background.height
+    (0.7 * canvas.width) / background.width,
+    (0.7 * canvas.height) / background.height
   );
 
   puzzleDetails.finalWidth = coef * background.width;

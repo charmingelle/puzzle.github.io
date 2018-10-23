@@ -525,20 +525,20 @@ const createGame = () => {
   });
 
   window.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
     touchStartHandler(e, rects);
   });
 
   window.addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
     touchMoveHandler(e);
   });
 
   window.addEventListener('touchend', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
     touchEndHandler(rects);
   });
 };
@@ -587,7 +587,7 @@ fileUpload.addEventListener("change", () => {
     console.log("An error occured while file uploading. Please try again.");
 });
 
-document.body.addEventListener('scroll', e => {
-  e.preventDefault();
-  e.stopPropagation();
-})
+// document.body.addEventListener('scroll', e => {
+//   e.preventDefault();
+//   e.stopPropagation();
+// })

@@ -3061,8 +3061,55 @@ const getSelectedIndex = rects => {
   return -1;
 };
 
+const touchStartHandler = (e, rects) => {
+  [mouse.x, mouse.y] = [e.clientX, e.clientY];
+  
+  let selectedIndex = getSelectedIndex(rects);
+
+  if (selectedIndex !== -1) {
+    selected = rects[selectedIndex];
+    selected.calcOffsets();
+    rects.splice(selectedIndex, 1);
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    rects.forEach(rect => {
+      rect.draw();
+    });
+    selected.drawUpper();
+  }
+};
+
+const touchMoveHandler = e => {
+  [mouse.x, mouse.y] = [e.clientX, e.clientY];
+  if (selected) {
+    upperContext.clearRect(0, 0, canvas.width, canvas.height);
+    selected.move(mouse);
+    selected.drawUpper();
+  }
+};
+
+const touchEndHandler = rects => {
+  if (selected) {
+    upperContext.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < rects.length; i++) {
+      let shift = selected.getShift(rects[i]);
+
+      if (shift) {
+        selected.shift(shift);
+        selected.drawUpper();
+        sound.play();
+        selected = new PuzzleSet(...selected.puzzles, ...rects[i].puzzles);
+        rects.splice(i, 1);
+        break;
+      }
+    }
+    rects.push(selected);
+    selected.draw();
+    selected = false;
+  }
+};
+
 const mouseDownHandler = (e, rects) => {
-  [mouse.x, mouse.y] = [e.center.x, e.center.y];
+  [mouse.x, mouse.y] = [e.pageX, e.pageY];
   
   let selectedIndex = getSelectedIndex(rects);
 
@@ -3079,7 +3126,7 @@ const mouseDownHandler = (e, rects) => {
 };
 
 const mouseMoveHandler = e => {
-  [mouse.x, mouse.y] = [e.center.x, e.center.y];
+  [mouse.x, mouse.y] = [e.pageX, e.pageY];
   if (selected) {
     upperContext.clearRect(0, 0, canvas.width, canvas.height);
     selected.move(mouse);
@@ -3112,17 +3159,41 @@ const createGame = () => {
   setPuzzleDetails();
   rects = initiatePuzzleSets();
 
-  hammertime.on('panstart', function(e) {
+  window.addEventListener('mousedown', function(e) {
     mouseDownHandler(e, rects);
   });
 
-  hammertime.on('panmove', function(e) {
+  window.addEventListener('mousemove', function(e) {
     mouseMoveHandler(e);
   });
 
-  hammertime.on('panend', function(e) {
+  window.addEventListener('mouseup', function(e) {
     mouseUpHandler(rects);
   });
+
+  window.addEventListener('touchstart', function(e) {
+    touchStartHandler(e, rects);
+  });
+
+  window.addEventListener('touchmove', function(e) {
+    touchMoveHandler(e);
+  });
+
+  window.addEventListener('touchend', function(e) {
+    touchEndHandler(rects);
+  });
+
+  // hammertime.on('panstart', function(e) {
+  //   mouseDownHandler(e, rects);
+  // });
+
+  // hammertime.on('panmove', function(e) {
+  //   mouseMoveHandler(e);
+  // });
+
+  // hammertime.on('panend', function(e) {
+  //   mouseUpHandler(rects);
+  // });
 };
 
 let menu = document.getElementById("menu");

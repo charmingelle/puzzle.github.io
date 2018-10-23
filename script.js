@@ -45,6 +45,8 @@ class Puzzle {
     this.offsetD;
     this.curveCoefs = curveCoefs;
     this.path = this.getPath();
+    this.imagePuzzleStartX = this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3;
+    this.imagePuzzleStartY = this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3;
   }
 
   getPath() {
@@ -131,14 +133,14 @@ class Puzzle {
   drawBackground(context) {
     context.drawImage(
       background,
-      this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3,
-      this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3,
-      puzzleDetails.imageWidth + 2 * (puzzleDetails.imageWidth / 3),
-      puzzleDetails.imageHeight + 2 * (puzzleDetails.imageHeight / 3),
+      this.imagePuzzleStartX,
+      this.imagePuzzleStartY,
+      puzzleDetails.imagePuzzleWidth,
+      puzzleDetails.imagePuzzleHeight,
       this.currentA.x - puzzleDetails.widthThird,
       this.currentA.y - puzzleDetails.heightThird,
-      puzzleDetails.width + 2 * puzzleDetails.widthThird,
-      puzzleDetails.height + 2 * puzzleDetails.heightThird
+      puzzleDetails.canvasPuzzleWidth,
+      puzzleDetails.canvasPuzzleHeight
     );
   }
 
@@ -348,6 +350,10 @@ const setPuzzleDetails = (minPuzzleAmount = 7) => {
   puzzleDetails.yPosition = 0.9 * canvas.height / puzzleDetails.verticalAmount;
   puzzleDetails.widthThird = puzzleDetails.width / 3;
   puzzleDetails.heightThird = puzzleDetails.height / 3;
+  puzzleDetails.imagePuzzleWidth = puzzleDetails.imageWidth + 2 * (puzzleDetails.imageWidth / 3);
+  puzzleDetails.imagePuzzleHeight = puzzleDetails.imageHeight + 2 * (puzzleDetails.imageHeight / 3);
+  puzzleDetails.canvasPuzzleWidth = puzzleDetails.width + 2 * puzzleDetails.widthThird;
+  puzzleDetails.canvasPuzzleHeight = puzzleDetails.height + 2 * puzzleDetails.heightThird;
 };
 
 const getPuzzlePositions = () => {

@@ -44,43 +44,78 @@ class Puzzle {
     this.offsetC;
     this.offsetD;
     this.curveCoefs = curveCoefs;
-    this.path = this.getPath();
     this.imagePuzzleStartX =
       this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3;
     this.imagePuzzleStartY =
       this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3;
   }
 
-  getPath() {
-    let path = new Path2D();
+  drawBackground(context) {
+    context.drawImage(
+      background,
+      this.imagePuzzleStartX,
+      this.imagePuzzleStartY,
+      puzzleDetails.imagePuzzleWidth,
+      puzzleDetails.imagePuzzleHeight,
+      this.currentA.x - puzzleDetails.widthThird,
+      this.currentA.y - puzzleDetails.heightThird,
+      puzzleDetails.canvasPuzzleWidth,
+      puzzleDetails.canvasPuzzleHeight
+    );
+  }
 
+  getHorizontal(path, a, b, coef) {
+    if (coef === 0) {
+      path.lineTo(b.x, b.y);
+      return;
+    }
+    let diff = a.x - b.x;
+    let third = diff / 3;
+
+    path.lineTo(a.x - third, b.y);
+    path.quadraticCurveTo(b.x + diff / 2, b.y + coef * third, b.x + third, b.y);
+    path.lineTo(b.x, b.y);
+  }
+
+  getVertical(path, a, b, coef) {
+    if (coef === 0) {
+      path.lineTo(b.x, b.y);
+      return;
+    }
+    let diff = a.y - b.y;
+    let third = diff / 3;
+
+    path.lineTo(a.x, a.y - third);
+    path.quadraticCurveTo(a.x + coef * third, a.y - diff / 2, b.x, b.y + third);
+    path.lineTo(b.x, b.y);
+  }
+
+  getPath(path) {
     path.moveTo(this.currentA.x, this.currentA.y);
-    this.drawHorizontal(
+    this.getHorizontal(
       path,
       this.currentA,
       this.currentB,
       this.curveCoefs.startHCoef
     );
-    this.drawVertical(
+    this.getVertical(
       path,
       this.currentB,
       this.currentD,
       this.curveCoefs.endVCoef
     );
-    this.drawHorizontal(
+    this.getHorizontal(
       path,
       this.currentD,
       this.currentC,
       this.curveCoefs.endHCoef
     );
-    this.drawVertical(
+    this.getVertical(
       path,
       this.currentC,
       this.currentA,
       this.curveCoefs.startVCoef
     );
-    path.closePath();
-    return path;
   }
 
   isMouseOver() {
@@ -104,63 +139,6 @@ class Puzzle {
     this.currentB = mouse.diff(this.offsetB);
     this.currentC = mouse.diff(this.offsetC);
     this.currentD = mouse.diff(this.offsetD);
-  }
-
-  drawHorizontal(path, a, b, coef) {
-    if (coef === 0) {
-      path.lineTo(b.x, b.y);
-      return;
-    }
-    let diff = a.x - b.x;
-    let third = diff / 3;
-
-    path.lineTo(a.x - third, b.y);
-    path.quadraticCurveTo(b.x + diff / 2, b.y + coef * third, b.x + third, b.y);
-    path.lineTo(b.x, b.y);
-  }
-
-  drawVertical(path, a, b, coef) {
-    if (coef === 0) {
-      path.lineTo(b.x, b.y);
-      return;
-    }
-    let diff = a.y - b.y;
-    let third = diff / 3;
-
-    path.lineTo(a.x, a.y - third);
-    path.quadraticCurveTo(a.x + coef * third, a.y - diff / 2, b.x, b.y + third);
-    path.lineTo(b.x, b.y);
-  }
-
-  drawBackground(context) {
-    context.drawImage(
-      background,
-      this.imagePuzzleStartX,
-      this.imagePuzzleStartY,
-      puzzleDetails.imagePuzzleWidth,
-      puzzleDetails.imagePuzzleHeight,
-      this.currentA.x - puzzleDetails.widthThird,
-      this.currentA.y - puzzleDetails.heightThird,
-      puzzleDetails.canvasPuzzleWidth,
-      puzzleDetails.canvasPuzzleHeight
-    );
-  }
-
-  drawPuzzle(context) {
-    context.save();
-    context.clip(this.path, "nonzero");
-    this.drawBackground(context);
-    context.stroke(this.path);
-    context.restore();
-  }
-
-  drawUpper() {
-    this.path = this.getPath();
-    this.drawPuzzle(upperContext);
-  }
-
-  draw() {
-    this.drawPuzzle(context);
   }
 
   isNearOtherLeft(other) {
@@ -267,6 +245,7 @@ class Puzzle {
 class PuzzleSet {
   constructor(...puzzles) {
     this.puzzles = puzzles;
+    this.path = this.getPath();
   }
 
   isMouseOver() {
@@ -281,12 +260,29 @@ class PuzzleSet {
     this.puzzles.forEach(puzzle => puzzle.move());
   }
 
+  getPath() {
+    let path = new Path2D();
+
+    this.puzzles.forEach(puzzle => puzzle.getPath(path));
+    path.closePath();
+    return path;
+  }
+
+  drawPuzzle(context) {
+    context.save();
+    context.clip(this.path, "nonzero");
+    this.puzzles.forEach(puzzle => puzzle.drawBackground(context));
+    context.stroke(this.path);
+    context.restore();
+  }
+
   drawUpper() {
-    this.puzzles.forEach(puzzle => puzzle.drawUpper());
+    this.path = this.getPath();
+    this.drawPuzzle(upperContext);
   }
 
   draw() {
-    this.puzzles.forEach(puzzle => puzzle.draw());
+    this.drawPuzzle(context);
   }
 
   getShift(other) {

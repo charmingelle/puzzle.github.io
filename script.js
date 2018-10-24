@@ -45,8 +45,10 @@ class Puzzle {
     this.offsetD;
     this.curveCoefs = curveCoefs;
     this.path = this.getPath();
-    this.imagePuzzleStartX = this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3;
-    this.imagePuzzleStartY = this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3;
+    this.imagePuzzleStartX =
+      this.a.x * puzzleDetails.imageWidth - puzzleDetails.imageWidth / 3;
+    this.imagePuzzleStartY =
+      this.a.y * puzzleDetails.imageHeight - puzzleDetails.imageHeight / 3;
   }
 
   getPath() {
@@ -347,13 +349,18 @@ const setPuzzleDetails = (minPuzzleAmount = 7) => {
       background.width / puzzleDetails.horizontalAmount;
   }
   puzzleDetails.xPosition = canvas.width / puzzleDetails.horizontalAmount;
-  puzzleDetails.yPosition = 0.9 * canvas.height / puzzleDetails.verticalAmount;
+  puzzleDetails.yPosition =
+    (0.9 * canvas.height) / puzzleDetails.verticalAmount;
   puzzleDetails.widthThird = puzzleDetails.width / 3;
   puzzleDetails.heightThird = puzzleDetails.height / 3;
-  puzzleDetails.imagePuzzleWidth = puzzleDetails.imageWidth + 2 * (puzzleDetails.imageWidth / 3);
-  puzzleDetails.imagePuzzleHeight = puzzleDetails.imageHeight + 2 * (puzzleDetails.imageHeight / 3);
-  puzzleDetails.canvasPuzzleWidth = puzzleDetails.width + 2 * puzzleDetails.widthThird;
-  puzzleDetails.canvasPuzzleHeight = puzzleDetails.height + 2 * puzzleDetails.heightThird;
+  puzzleDetails.imagePuzzleWidth =
+    puzzleDetails.imageWidth + 2 * (puzzleDetails.imageWidth / 3);
+  puzzleDetails.imagePuzzleHeight =
+    puzzleDetails.imageHeight + 2 * (puzzleDetails.imageHeight / 3);
+  puzzleDetails.canvasPuzzleWidth =
+    puzzleDetails.width + 2 * puzzleDetails.widthThird;
+  puzzleDetails.canvasPuzzleHeight =
+    puzzleDetails.height + 2 * puzzleDetails.heightThird;
 };
 
 const getPuzzlePositions = () => {
@@ -420,9 +427,11 @@ const getSelectedIndex = rects => {
   return -1;
 };
 
-const touchStartHandler = (e, rects) => {
-  [mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY];
-  
+const moveStartHandler = (e, rects, isMouse) => {
+  isMouse
+    ? ([mouse.x, mouse.y] = [e.pageX, e.pageY])
+    : ([mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY]);
+
   let selectedIndex = getSelectedIndex(rects);
 
   if (selectedIndex !== -1) {
@@ -437,8 +446,10 @@ const touchStartHandler = (e, rects) => {
   }
 };
 
-const touchMoveHandler = e => {
-  [mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY];
+const moveHandler = (e, isMouse) => {
+  isMouse
+    ? ([mouse.x, mouse.y] = [e.pageX, e.pageY])
+    : ([mouse.x, mouse.y] = [e.touches[0].clientX, e.touches[0].clientY]);
   if (selected) {
     upperContext.clearRect(0, 0, canvas.width, canvas.height);
     selected.move(mouse);
@@ -446,54 +457,7 @@ const touchMoveHandler = e => {
   }
 };
 
-const touchEndHandler = rects => {
-  if (selected) {
-    upperContext.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < rects.length; i++) {
-      let shift = selected.getShift(rects[i]);
-
-      if (shift) {
-        selected.shift(shift);
-        selected.drawUpper();
-        sound.play();
-        selected = new PuzzleSet(...selected.puzzles, ...rects[i].puzzles);
-        rects.splice(i, 1);
-        break;
-      }
-    }
-    rects.push(selected);
-    selected.draw();
-    selected = false;
-  }
-};
-
-const mouseDownHandler = (e, rects) => {
-  [mouse.x, mouse.y] = [e.pageX, e.pageY];
-  
-  let selectedIndex = getSelectedIndex(rects);
-
-  if (selectedIndex !== -1) {
-    selected = rects[selectedIndex];
-    selected.calcOffsets();
-    rects.splice(selectedIndex, 1);
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    rects.forEach(rect => {
-      rect.draw();
-    });
-    selected.drawUpper();
-  }
-};
-
-const mouseMoveHandler = e => {
-  [mouse.x, mouse.y] = [e.pageX, e.pageY];
-  if (selected) {
-    upperContext.clearRect(0, 0, canvas.width, canvas.height);
-    selected.move(mouse);
-    selected.drawUpper();
-  }
-};
-
-const mouseUpHandler = rects => {
+const moveEndHandler = rects => {
   if (selected) {
     upperContext.clearRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < rects.length; i++) {
@@ -518,29 +482,12 @@ const createGame = () => {
   setPuzzleDetails();
   rects = initiatePuzzleSets();
 
-  window.addEventListener('mousedown', function(e) {
-    mouseDownHandler(e, rects);
-  });
-
-  window.addEventListener('mousemove', function(e) {
-    mouseMoveHandler(e);
-  });
-
-  window.addEventListener('mouseup', function(e) {
-    mouseUpHandler(rects);
-  });
-
-  window.addEventListener('touchstart', function(e) {
-    touchStartHandler(e, rects);
-  });
-
-  window.addEventListener('touchmove', function(e) {
-    touchMoveHandler(e);
-  });
-
-  window.addEventListener('touchend', function(e) {
-    touchEndHandler(rects);
-  });
+  window.addEventListener("mousedown", e => moveStartHandler(e, rects, true));
+  window.addEventListener("touchstart", e => moveStartHandler(e, rects, false));
+  window.addEventListener("mousemove", e => moveHandler(e, true));
+  window.addEventListener("touchmove", e => moveHandler(e, false));
+  window.addEventListener("mouseup", e => moveEndHandler(rects));
+  window.addEventListener("touchend", e => moveEndHandler(rects));
 };
 
 let menu = document.getElementById("menu");

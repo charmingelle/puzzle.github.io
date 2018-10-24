@@ -419,7 +419,7 @@ const initiatePuzzleSets = () => {
 };
 
 const getSelectedIndex = rects => {
-  for (let i = 0; i < rects.length; i++) {
+  for (let i = rects.length - 1; i >= 0; i--) {
     if (rects[i].isMouseOver()) {
       return i;
     }

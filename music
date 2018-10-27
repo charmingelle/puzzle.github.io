@@ -1,8 +1,1 @@
 Tycho - Epoch (Full Album) [HD]
-
-    // return (
-    //   this.isCoordOver(selected.currentA.diff({x: puzzleDetails.widthThird, y: puzzleDetails.heightThird})) ||
-    //   this.isCoordOver(selected.currentB.diff({x: -puzzleDetails.widthThird, y: puzzleDetails.heightThird})) ||
-    //   this.isCoordOver(selected.currentC.diff({x: -puzzleDetails.widthThird, y: -puzzleDetails.heightThird})) ||
-    //   this.isCoordOver(selected.currentD.diff({x: puzzleDetails.widthThird, y: -puzzleDetails.heightThird}))
-    // );

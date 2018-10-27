@@ -248,6 +248,70 @@ class PuzzleSet {
     this.path = this.getPath();
   }
 
+  getEraseRect() {
+    let left = this.puzzles[0].currentA.x;
+    let top = this.puzzles[0].currentA.y;
+    let right = this.puzzles[0].currentD.x;
+    let bottom = this.puzzles[0].currentD.y;
+
+    for (let i = 1; i < this.puzzles.length; i++) {
+      if (this.puzzles[i].currentA.x < left) {
+        left = this.puzzles[i].currentA.x;
+      }
+      if (this.puzzles[i].currentA.y < top) {
+        top = this.puzzles[i].currentA.y;
+      }
+      if (this.puzzles[i].currentD.x > right) {
+        right = this.puzzles[i].currentD.x;
+      }
+      if (this.puzzles[i].currentD.y > bottom) {
+        bottom = this.puzzles[i].currentD.y;
+      }
+    }
+    return {
+      start: new Point(
+        left - puzzleDetails.widthThird,
+        top - puzzleDetails.heightThird
+      ),
+      end: new Point(
+        right + puzzleDetails.widthThird,
+        bottom + puzzleDetails.heightThird
+      )
+    };
+  }
+
+  erase() {
+    this.eraseRect = this.getEraseRect();
+    context.clearRect(
+      this.eraseRect.start.x,
+      this.eraseRect.start.y,
+      this.eraseRect.end.x - this.eraseRect.start.x,
+      this.eraseRect.end.y - this.eraseRect.start.y
+    );
+  }
+
+  overlaps(other) {
+    other.eraseRect = other.getEraseRect();
+    return (
+      (this.eraseRect.start.x <= other.eraseRect.end.x &&
+        this.eraseRect.end.x >= other.eraseRect.start.x &&
+        other.eraseRect.start.y <= this.eraseRect.end.y &&
+        other.eraseRect.end.y >= this.eraseRect.start.y) ||
+      (other.eraseRect.start.x <= this.eraseRect.end.x &&
+        other.eraseRect.end.x >= this.eraseRect.start.x &&
+        other.eraseRect.start.y <= this.eraseRect.end.y &&
+        other.eraseRect.end.y >= this.eraseRect.start.y) ||
+      (this.eraseRect.start.x <= other.eraseRect.end.x &&
+        this.eraseRect.end.x >= other.eraseRect.start.x &&
+        this.eraseRect.start.y <= other.eraseRect.end.y &&
+        this.eraseRect.end.y >= other.eraseRect.start.y) ||
+      (other.eraseRect.start.x <= this.eraseRect.end.x &&
+        other.eraseRect.end.x >= this.eraseRect.start.x &&
+        this.eraseRect.start.y <= other.eraseRect.end.y &&
+        this.eraseRect.end.y >= other.eraseRect.start.y)
+    );
+  }
+
   isMouseOver() {
     return this.puzzles.some(puzzle => puzzle.isMouseOver());
   }
@@ -272,7 +336,6 @@ class PuzzleSet {
     context.save();
     context.clip(this.path, "nonzero");
     this.puzzles.forEach(puzzle => puzzle.drawBackground(context));
-    context.stroke(this.path);
     context.restore();
   }
 
@@ -432,11 +495,13 @@ const moveStartHandler = (e, rects, isMouse) => {
 
   if (selectedIndex !== -1) {
     selected = rects[selectedIndex];
-    selected.calcOffsets();
     rects.splice(selectedIndex, 1);
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    selected.calcOffsets();
+    selected.erase();
     rects.forEach(rect => {
-      rect.draw();
+      if (selected.overlaps(rect)) {
+        rect.draw();
+      }
     });
     selected.drawUpper();
   }

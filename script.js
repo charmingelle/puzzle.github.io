@@ -246,36 +246,45 @@ class PuzzleSet {
   constructor(...puzzles) {
     this.puzzles = puzzles;
     this.path = this.getPath();
+    this.indexes = this.getCornerPuzzleIndexes();
+  }
+
+  getCornerPuzzleIndexes() {
+    let leftIndex = 0;
+    let topIndex = 0;
+    let rightIndex = 0;
+    let bottomIndex = 0;
+
+    for (let i = 0; i < this.puzzles.length; i++) {
+      if (this.puzzles[i].a.x < this.puzzles[leftIndex].a.x) {
+        leftIndex = i;
+      }
+      if (this.puzzles[i].a.y < this.puzzles[topIndex].a.y) {
+        topIndex = i;
+      }
+      if (this.puzzles[i].d.x > this.puzzles[rightIndex].d.x) {
+        rightIndex = i;
+      }
+      if (this.puzzles[i].d.y > this.puzzles[bottomIndex].d.y) {
+        bottomIndex = i;
+      }
+    }
+    return { leftIndex, topIndex, rightIndex, bottomIndex };
   }
 
   getEraseRect() {
-    let left = this.puzzles[0].currentA.x;
-    let top = this.puzzles[0].currentA.y;
-    let right = this.puzzles[0].currentD.x;
-    let bottom = this.puzzles[0].currentD.y;
-
-    for (let i = 1; i < this.puzzles.length; i++) {
-      if (this.puzzles[i].currentA.x < left) {
-        left = this.puzzles[i].currentA.x;
-      }
-      if (this.puzzles[i].currentA.y < top) {
-        top = this.puzzles[i].currentA.y;
-      }
-      if (this.puzzles[i].currentD.x > right) {
-        right = this.puzzles[i].currentD.x;
-      }
-      if (this.puzzles[i].currentD.y > bottom) {
-        bottom = this.puzzles[i].currentD.y;
-      }
-    }
     return {
       start: new Point(
-        left - puzzleDetails.widthThird,
-        top - puzzleDetails.heightThird
+        this.puzzles[this.indexes.leftIndex].currentA.x -
+          puzzleDetails.widthThird,
+        this.puzzles[this.indexes.topIndex].currentA.y -
+          puzzleDetails.heightThird
       ),
       end: new Point(
-        right + puzzleDetails.widthThird,
-        bottom + puzzleDetails.heightThird
+        this.puzzles[this.indexes.rightIndex].currentD.x +
+          puzzleDetails.widthThird,
+        this.puzzles[this.indexes.bottomIndex].currentD.y +
+          puzzleDetails.heightThird
       )
     };
   }
@@ -332,10 +341,38 @@ class PuzzleSet {
     return path;
   }
 
+  drawBackground(context) {
+    context.drawImage(
+      background,
+      this.puzzles[this.indexes.leftIndex].a.x * puzzleDetails.imageWidth -
+        puzzleDetails.imageWidth / 3,
+      this.puzzles[this.indexes.topIndex].a.y * puzzleDetails.imageHeight -
+        puzzleDetails.imageHeight / 3,
+      this.puzzles[this.indexes.rightIndex].d.x * puzzleDetails.imageWidth +
+        puzzleDetails.imageWidth / 3 -
+        this.puzzles[this.indexes.leftIndex].a.x * puzzleDetails.imageWidth +
+        puzzleDetails.imageWidth / 3,
+      this.puzzles[this.indexes.bottomIndex].d.y * puzzleDetails.imageHeight +
+        puzzleDetails.imageHeight / 3 -
+        this.puzzles[this.indexes.topIndex].a.y * puzzleDetails.imageHeight +
+        puzzleDetails.imageHeight / 3,
+      this.puzzles[this.indexes.leftIndex].currentA.x -
+        puzzleDetails.widthThird,
+      this.puzzles[this.indexes.topIndex].currentA.y -
+        puzzleDetails.heightThird,
+      this.puzzles[this.indexes.rightIndex].currentD.x -
+        this.puzzles[this.indexes.leftIndex].currentA.x +
+        2 * puzzleDetails.widthThird,
+      this.puzzles[this.indexes.bottomIndex].currentD.y -
+        this.puzzles[this.indexes.topIndex].currentA.y +
+        2 * puzzleDetails.heightThird
+    );
+  }
+
   drawPuzzle(context) {
     context.save();
     context.clip(this.path, "nonzero");
-    this.puzzles.forEach(puzzle => puzzle.drawBackground(context));
+    this.drawBackground(context);
     context.restore();
   }
 
